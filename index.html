@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>I Pray For You</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *{
+      box-sizing:border-box;margin:0;padding:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    body{
+      min-height:100vh;
+      background:radial-gradient(circle at top,#ffe08a 0%,#111 40%,#000 100%);
+      color:#f8f5e9;
+      display:flex;justify-content:center;align-items:center;
+      padding:16px;
+    }
+    .card{
+      width:100%;max-width:480px;
+      background:rgba(10,10,10,.95);
+      border-radius:18px;
+      padding:14px 18px 22px;
+      box-shadow:0 18px 40px rgba(0,0,0,.9);
+      border:1px solid rgba(255,215,128,.5);
+    }
+    .lang-row{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:4px;font-size:11px;color:#e3d9b8;
+      gap:8px;
+    }
+    .lang-select,.focus-select{
+      background:#111;color:#f8f5e9;
+      border-radius:999px;border:1px solid #444;
+      padding:3px 8px;font-size:11px;outline:none;
+    }
+    .title{
+      text-align:center;font-size:24px;font-weight:700;
+      letter-spacing:.14em;text-transform:uppercase;
+      color:#ffd76a;margin-bottom:6px;
+    }
+    .subtitle{
+      text-align:center;font-size:12px;
+      color:#e3d9b8;margin-bottom:16px;
+    }
+    .section-title{
+      font-size:13px;font-weight:600;
+      margin-top:10px;margin-bottom:4px;color:#ffe08a;
+    }
+    .hint{
+      font-size:11px;color:#b9b19a;margin-bottom:6px;
+    }
+    input,textarea{
+      width:100%;background:#111;border-radius:10px;
+      border:1px solid #444;padding:8px 10px;color:#f8f5e9;
+      font-size:13px;outline:none;
+    }
+    input:focus,textarea:focus{
+      border-color:#ffd76a;
+      box-shadow:0 0 0 1px rgba(255,215,106,.5);
+    }
+    textarea{min-height:60px;resize:vertical;}
+    .amount-row{
+      display:flex;gap:8px;margin-top:6px;margin-bottom:8px;
+    }
+    .amount-btn{
+      flex:1;padding:8px 6px;border-radius:999px;
+      border:1px solid #555;font-size:12px;
+      background:#111;color:#f8f5e9;text-align:center;
+    }
+    .amount-btn.selected{
+      background:linear-gradient(135deg,#ffd76a,#ffb347);
+      color:#1b1305;border-color:#ffd76a;font-weight:600;
+    }
+    .wallet-box{
+      margin-top:6px;padding:8px;
+      background:rgba(255,215,106,.07);
+      border-radius:10px;border:1px dashed rgba(255,215,106,.6);
+      font-size:11px;word-wrap:break-word;
+    }
+    .wallet-address{margin-top:4px;font-size:11px;color:#ffe9aa;}
+    .copy-row,.qr-row{
+      margin-top:6px;display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;
+    }
+    .copy-btn{
+      border-radius:999px;border:1px solid #ffd76a;
+      background:transparent;color:#ffd76a;
+      font-size:11px;padding:4px 10px;
+    }
+    .pay-info{
+      font-size:11px;color:#c0b396;margin-top:8px;
+    }
+    .primary-btn,.secondary-btn{
+      margin-top:12px;width:100%;border-radius:999px;
+      padding:10px;border:none;font-size:13px;
+      text-transform:uppercase;letter-spacing:.08em;
+      font-weight:700;
+    }
+    .primary-btn{
+      background:linear-gradient(135deg,#ffd76a,#ffae42);
+      color:#1b1305;
+    }
+    .secondary-btn{
+      background:transparent;color:#ffd76a;
+      border:1px solid rgba(255,215,106,.7);
+      font-weight:600;
+    }
+    .primary-btn:active,.secondary-btn:active{
+      transform:translateY(1px);filter:brightness(.95);
+    }
+    .message-box{
+      margin-top:16px;padding:10px 10px 12px;
+      border-radius:12px;background:rgba(20,18,10,.98);
+      border:1px solid rgba(255,215,128,.7);
+      min-height:60px;font-size:13px;line-height:1.5;
+      position:relative;overflow:hidden;
+    }
+    .message-title{
+      font-size:11px;text-transform:uppercase;
+      letter-spacing:.14em;color:#c9b88b;margin-bottom:4px;
+    }
+    .glow{
+      position:absolute;top:-40px;right:-40px;
+      width:120px;height:120px;
+      background:radial-gradient(circle,rgba(255,215,106,.4),transparent 60%);
+      opacity:.5;pointer-events:none;
+    }
+    .footer{
+      margin-top:8px;text-align:center;
+      font-size:10px;color:#8c8263;
+    }
+    .qr-container{
+      margin-top:8px;display:none;
+      justify-content:center;
+    }
+    .qr-container img{
+      width:180px;height:180px;border-radius:12px;
+      border:1px solid rgba(255,215,106,.6);
+      background:#000;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="lang-row">
+      <div>
+        <span id="langLabel">🌍 Language:</span>
+      </div>
+      <select id="langSelect" class="lang-select">
+        <option value="en">English</option>
+        <option value="fa">فارسی</option>
+        <option value="ar">العربية</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+        <option value="zh">中文</option>
+        <option value="ko">한국어</option>
+        <option value="ja">日本語</option>
+      </select>
+    </div>
+
+    <div id="appTitle" class="title">I Pray For You</div>
+    <div id="subtitle" class="subtitle">
+      Mystical, kind, uplifting wishes for your heart.
+    </div>
+
+    <div class="section-title" id="focusLabel">Focus of your message</div>
+    <select id="focusSelect" class="focus-select">
+      <option value="any" id="focusAnyOpt">Any</option>
+      <option value="love" id="focusLoveOpt">Love</option>
+      <option value="health" id="focusHealthOpt">Health</option>
+      <option value="wealth" id="focusWealthOpt">Wealth</option>
+      <option value="peace" id="focusPeaceOpt">Peace</option>
+      <option value="success" id="focusSuccessOpt">Success</option>
+    </select>
+
+    <!-- Name -->
+    <div id="nameLabel" class="section-title">Your name (optional)</div>
+    <div id="nameHint" class="hint">
+      Used only inside your message. It is not stored anywhere.
+    </div>
+    <input id="nameInput" type="text" placeholder="Type your name here" />
+
+    <!-- Wish -->
+    <div id="wishLabel" class="section-title">Your request / wish</div>
+    <div id="wishHint" class="hint">
+      Write your intention. This text is not stored anywhere.
+    </div>
+    <textarea id="wishInput" placeholder="Type your wish here"></textarea>
+
+    <!-- Amount -->
+    <div id="paymentTitle" class="section-title" style="margin-top:12px;">
+      Payment (USDT – TRC20 / BEP20)
+    </div>
+    <div id="chooseAmountLabel" class="hint">Choose your amount:</div>
+
+    <div class="amount-row">
+      <button class="amount-btn selected" data-amount="10">10 USDT</button>
+      <button class="amount-btn" data-amount="15">15 USDT</button>
+    </div>
+
+    <input id="customAmount" type="number" min="1" step="1"
+           placeholder="Or enter a custom amount (USDT)" />
+
+    <div class="wallet-box">
+      <div id="networkLabel">
+        Network: <strong>TRC20 or BEP20</strong>
+      </div>
+      <div id="sendWalletLabel">Send your payment to this wallet:</div>
+      <div id="walletAddress" class="wallet-address">
+        0x61b7Fc68D15D6a3CcBd924eBeaE8B3e75ded83a3
+      </div>
+      <div class="copy-row">
+        <button id="copyWalletBtn" class="copy-btn">
+          Copy wallet address
+        </button>
+        <button id="showQrBtn" class="copy-btn">
+          Show QR code
+        </button>
+      </div>
+      <div id="qrNote" class="hint" style="margin-top:4px;"></div>
+      <div id="qrContainer" class="qr-container">
+        <img id="qrImage" alt="QR code" />
+      </div>
+    </div>
+
+    <div id="payInfo" class="pay-info">
+      After sending the chosen amount of USDT to the wallet above,
+      tap the button below to receive your mystical message.
+    </div>
+
+    <button class="primary-btn" id="showMessageBtn">
+      I have paid – show my message
+    </button>
+
+    <button class="secondary-btn" id="shareBtn">
+      Share this experience
+    </button>
+
+    <div class="message-box" id="messageBox">
+      <div class="glow"></div>
+      <div id="messageTitle" class="message-title">Your message</div>
+      <div id="messageText">
+        Your message will appear here, written with kind intentions for you.
+      </div>
+    </div>
+
+    <div id="footerText" class="footer">
+      This experience is not connected to any religion.
+      It is only about positive, human, mystical wishes.
+    </div>
+  </div>
+
+  <!-- صدای آرام‌بخش: فایل chime.mp3 را کنار این HTML بگذار -->
+  <audio id="chimeAudio" src="chime.mp3" preload="auto"></audio>
+
+  <script>
+    const amountButtons = document.querySelectorAll(".amount-btn");
+    const customAmountInput = document.getElementById("customAmount");
+    const showMessageBtn = document.getElementById("showMessageBtn");
+    const messageText = document.getElementById("messageText");
+    const nameInput = document.getElementById("nameInput");
+    const walletAddressEl = document.getElementById("walletAddress");
+    const copyWalletBtn = document.getElementById("copyWalletBtn");
+    const showQrBtn = document.getElementById("showQrBtn");
+    const qrContainer = document.getElementById("qrContainer");
+    const qrImage = document.getElementById("qrImage");
+    const langSelect = document.getElementById("langSelect");
+    const focusSelect = document.getElementById("focusSelect");
+    const shareBtn = document.getElementById("shareBtn");
+    const chime = document.getElementById("chimeAudio");
+
+    let selectedAmount = 10;
+    let currentLang = "en";
+
+    const translations = {
+      en: {
+        langLabel:"🌍 Language:",
+        title:"I Pray For You",
+        subtitle:"Mystical, kind, uplifting wishes for your heart.",
+        focusLabel:"Focus of your message",
+        focusAny:"Any focus",
+        focusLove:"Love",
+        focusHealth:"Health",
+        focusWealth:"Wealth",
+        focusPeace:"Peace",
+        focusSuccess:"Success",
+        nameLabel:"Your name (optional)",
+        nameHint:"Used only inside your message. It is not stored anywhere.",
+        namePlaceholder:"Type your name here",
+        wishLabel:"Your request / wish",
+        wishHint:"Write your intention. This text is not stored anywhere.",
+        wishPlaceholder:"Type your wish here",
+        paymentTitle:"Payment (USDT – TRC20 / BEP20)",
+        chooseAmount:"Choose your amount:",
+        customAmountPlaceholder:"Or enter a custom amount (USDT)",
+        networkLabel:"Network: TRC20 or BEP20",
+        sendWalletLabel:"Send your payment to this wallet:",
+        payInfo:"After sending the chosen amount of USDT to the wallet above, tap the button below to receive your mystical message.",
+        showButton:"I have paid – show my message",
+        messageTitle:"Your message",
+        defaultMessage:"Your message will appear here, written with kind intentions for you.",
+        footer:"This experience is not connected to any religion. It is only about positive, human, mystical wishes.",
+        copyWallet:"Copy wallet address",
+        copied:"Copied!",
+        showQr:"Show QR code",
+        qrNote:"Scan this QR with your wallet app to pay in USDT.",
+        shareButton:"Share this experience",
+        shareText:"This is I Pray For You. Send 10–15 USDT to this wallet: {wallet} and receive a mystical, uplifting message.",
+        paymentNotePrefix:" (Chosen for you after a payment of ",
+        paymentNoteSuffix:" USDT.)"
+      },
+      fa: {
+        langLabel:"🌍 زبان:",
+        title:"I Pray For You",
+        subtitle:"پیام‌های مهربان، عارفانه و انرژی‌بخش برای دلِ تو.",
+        focusLabel:"موضوع پیام شما",
+        focusAny:"بدون موضوع خاص",
+        focusLove:"عشق",
+        focusHealth:"سلامتی",
+        focusWealth:"ثروت",
+        focusPeace:"آرامش",
+        focusSuccess:"موفقیت",
+        nameLabel:"نام شما (اختیاری)",
+        nameHint:"فقط داخل پیام استفاده می‌شود و در جایی ذخیره نمی‌شود.",
+        namePlaceholder:"نام خود را اینجا بنویسید",
+        wishLabel:"درخواست / نیت شما",
+        wishHint:"نیت خود را بنویسید. این متن در هیچ‌جا ذخیره نمی‌شود.",
+        wishPlaceholder:"آرزوی خود را اینجا بنویسید",
+        paymentTitle:"پرداخت (تتر – TRC20 / BEP20)",
+        chooseAmount:"مبلغ مورد نظر را انتخاب کنید:",
+        customAmountPlaceholder:"یا مبلغ دلخواه (تتر) را وارد کنید",
+        networkLabel:"شبکه: TRC20 یا BEP20",
+        sendWalletLabel:"مبلغ را به این ولت ارسال کنید:",
+        payInfo:"پس از ارسال مبلغ انتخاب‌شده به ولت بالا، روی دکمه زیر بزنید تا پیام شما نمایش داده شود.",
+        showButton:"پرداخت کردم – پیامم را نشان بده",
+        messageTitle:"پیام شما",
+        defaultMessage:"پیام شما اینجا نمایش داده می‌شود؛ با نیت خیر برای شما نوشته شده است.",
+        footer:"این تجربه به هیچ دین و مذهبی متصل نیست؛ فقط درباره‌ی نیت‌های انسانی و مثبت است.",
+        copyWallet:"کپی آدرس ولت",
+        copied:"کپی شد!",
+        showQr:"نمایش QR کد",
+        qrNote:"این QR را با کیف‌پولت اسکن کن و تتر را ارسال کن.",
+        shareButton:"به اشتراک‌گذاری این تجربه",
+        shareText:"این سایت I Pray For You است. اگر ۱۰ تا ۱۵ تتر به این ولت بفرستی: {wallet} یک پیام عارفانه و انرژی‌بخش مخصوص خودت دریافت می‌کنی.",
+        paymentNotePrefix:" (مبلغ انتخابی ",
+        paymentNoteSuffix:" تتر.)"
+      },
+      ar: {
+        langLabel:"🌍 اللغة:",
+        title:"I Pray For You",
+        subtitle:"رسائل لطيفة وروحانية ترفع قلبك.",
+        focusLabel:"موضوع رسالتك",
+        focusAny:"أي موضوع",
+        focusLove:"المحبة",
+        focusHealth:"الصحة",
+        focusWealth:"الرزق",
+        focusPeace:"السلام",
+        focusSuccess:"النجاح",
+        nameLabel:"اسمك (اختياري)",
+        nameHint:"يُستخدم فقط داخل رسالتك ولا يُخزَّن في أي مكان.",
+        namePlaceholder:"اكتب اسمك هنا",
+        wishLabel:"طلبك / نيتك",
+        wishHint:"اكتب نيتك، هذا النص لا يُخزَّن في أي مكان.",
+        wishPlaceholder:"اكتب أمنيتك هنا",
+        paymentTitle:"الدفع (USDT – TRC20 / BEP20)",
+        chooseAmount:"اختر المبلغ:",
+        customAmountPlaceholder:"أو أدخل مبلغاً مخصصاً (USDT)",
+        networkLabel:"الشبكة: TRC20 أو BEP20",
+        sendWalletLabel:"أرسل المبلغ إلى هذا العنوان:",
+        payInfo:"بعد إرسال المبلغ المختار إلى العنوان أعلاه، اضغط الزر أدناه لاستلام رسالتك الروحانية.",
+        showButton:"دفعت – أظهر رسالتي",
+        messageTitle:"رسالتك",
+        defaultMessage:"ستظهر رسالتك هنا، مكتوبة بنوايا طيبة لك.",
+        footer:"هذه التجربة لا ترتبط بأي دين، إنما تتعلق فقط بالنوايا الإنسانية الإيجابية.",
+        copyWallet:"نسخ عنوان المحفظة",
+        copied:"تم النسخ!",
+        showQr:"إظهار رمز QR",
+        qrNote:"امسح رمز QR هذا بتطبيق المحفظة لإرسال USDT.",
+        shareButton:"مشاركة هذه التجربة",
+        shareText:"هذا هو I Pray For You. أرسل 10–15 USDT إلى هذا العنوان: {wallet} وستحصل على رسالة روحانية خاصة بك.",
+        paymentNotePrefix:" (تم اختيارها لك بعد دفع ",
+        paymentNoteSuffix:" USDT.)"
+      },
+      es: {
+        langLabel:"🌍 Idioma:",
+        title:"I Pray For You",
+        subtitle:"Deseos místicos, amables y elevadores para tu corazón.",
+        focusLabel:"Enfoque de tu mensaje",
+        focusAny:"Cualquier enfoque",
+        focusLove:"Amor",
+        focusHealth:"Salud",
+        focusWealth:"Abundancia",
+        focusPeace:"Paz",
+        focusSuccess:"Éxito",
+        nameLabel:"Tu nombre (opcional)",
+        nameHint:"Solo se usa dentro de tu mensaje. No se guarda en ninguna parte.",
+        namePlaceholder:"Escribe tu nombre aquí",
+        wishLabel:"Tu petición / deseo",
+        wishHint:"Escribe tu intención. Este texto no se almacena.",
+        wishPlaceholder:"Escribe tu deseo aquí",
+        paymentTitle:"Pago (USDT – TRC20 / BEP20)",
+        chooseAmount:"Elige tu monto:",
+        customAmountPlaceholder:"O introduce un monto personalizado (USDT)",
+        networkLabel:"Red: TRC20 o BEP20",
+        sendWalletLabel:"Envía tu pago a esta wallet:",
+        payInfo:"Después de enviar el monto elegido a la wallet de arriba, pulsa el botón para recibir tu mensaje místico.",
+        showButton:"He pagado – mostrar mi mensaje",
+        messageTitle:"Tu mensaje",
+        defaultMessage:"Tu mensaje aparecerá aquí, escrito con buenas intenciones para ti.",
+        footer:"Esta experiencia no está conectada a ninguna religión. Solo trata de deseos humanos positivos y místicos.",
+        copyWallet:"Copiar dirección de wallet",
+        copied:"¡Copiado!",
+        showQr:"Mostrar código QR",
+        qrNote:"Escanea este código QR con tu wallet para pagar en USDT.",
+        shareButton:"Compartir esta experiencia",
+        shareText:"Este es I Pray For You. Envía 10–15 USDT a esta wallet: {wallet} y recibe un mensaje místico y positivo.",
+        paymentNotePrefix:" (Elegido para ti después de un pago de ",
+        paymentNoteSuffix:" USDT.)"
+      },
+      de: {
+        langLabel:"🌍 Sprache:",
+        title:"I Pray For You",
+        subtitle:"Mystische, liebevolle und aufbauende Wünsche für dein Herz.",
+        focusLabel:"Fokus deiner Botschaft",
+        focusAny:"Beliebig",
+        focusLove:"Liebe",
+        focusHealth:"Gesundheit",
+        focusWealth:"Wohlstand",
+        focusPeace:"Frieden",
+        focusSuccess:"Erfolg",
+        nameLabel:"Dein Name (optional)",
+        nameHint:"Wird nur in deiner Nachricht verwendet und nirgendwo gespeichert.",
+        namePlaceholder:"Gib hier deinen Namen ein",
+        wishLabel:"Dein Wunsch / deine Bitte",
+        wishHint:"Schreibe deine Intention. Dieser Text wird nicht gespeichert.",
+        wishPlaceholder:"Schreibe deinen Wunsch hier",
+        paymentTitle:"Zahlung (USDT – TRC20 / BEP20)",
+        chooseAmount:"Wähle deinen Betrag:",
+        customAmountPlaceholder:"Oder gib einen eigenen Betrag (USDT) ein",
+        networkLabel:"Netzwerk: TRC20 oder BEP20",
+        sendWalletLabel:"Sende deine Zahlung an diese Wallet:",
+        payInfo:"Nachdem du den gewählten Betrag an die obige Wallet gesendet hast, tippe auf den Button, um deine mystische Nachricht zu erhalten.",
+        showButton:"Ich habe bezahlt – Nachricht anzeigen",
+        messageTitle:"Deine Nachricht",
+        defaultMessage:"Deine Nachricht erscheint hier – geschrieben mit guten Absichten für dich.",
+        footer:"Diese Erfahrung ist mit keiner Religion verbunden, sondern nur mit positiven, menschlichen, mystischen Wünschen.",
+        copyWallet:"Wallet-Adresse kopieren",
+        copied:"Kopiert!",
+        showQr:"QR-Code anzeigen",
+        qrNote:"Scanne diesen QR-Code mit deiner Wallet-App, um in USDT zu bezahlen.",
+        shareButton:"Diese Erfahrung teilen",
+        shareText:"Dies ist I Pray For You. Sende 10–15 USDT an diese Wallet: {wallet} und erhalte eine mystische, aufbauende Nachricht.",
+        paymentNotePrefix:" (Für dich gewählt nach einer Zahlung von ",
+        paymentNoteSuffix:" USDT.)"
+      },
+      zh: {
+        langLabel:"🌍 语言:",
+        title:"I Pray For You",
+        subtitle:"为你的内心送上温柔而神秘的祝福。",
+        focusLabel:"消息侧重点",
+        focusAny:"任意",
+        focusLove:"爱情",
+        focusHealth:"健康",
+        focusWealth:"财富",
+        focusPeace:"宁静",
+        focusSuccess:"成功",
+        nameLabel:"你的名字（可选）",
+        nameHint:"只会在你的讯息中使用，不会被储存。",
+        namePlaceholder:"在此输入你的名字",
+        wishLabel:"你的愿望 / 心愿",
+        wishHint:"写下你的心愿，此文字不会被储存。",
+        wishPlaceholder:"在此输入你的愿望",
+        paymentTitle:"支付（USDT – TRC20 / BEP20）",
+        chooseAmount:"选择支付金额：",
+        customAmountPlaceholder:"或输入自定义金额（USDT）",
+        networkLabel:"网络：TRC20 或 BEP20",
+        sendWalletLabel:"将款项发送至此钱包：",
+        payInfo:"将选定金额的 USDT 发送到以上地址后，点击下方按钮获取你的神秘讯息。",
+        showButton:"我已付款 – 显示我的讯息",
+        messageTitle:"你的讯息",
+        defaultMessage:"你的讯息会显示在这里，带着善意为你写下。",
+        footer:"本体验与任何宗教无关，只与积极的人类心愿有关。",
+        copyWallet:"复制钱包地址",
+        copied:"已复制！",
+        showQr:"显示二维码",
+        qrNote:"用钱包应用扫描此二维码并支付 USDT。",
+        shareButton:"分享这个体验",
+        shareText:"这是 I Pray For You。向此钱包发送 10–15 USDT：{wallet}，你将收到一条神秘而温暖的讯息。",
+        paymentNotePrefix:" （在你支付了 ",
+        paymentNoteSuffix:" USDT 之后为你选出的讯息。）"
+      },
+      ko: {
+        langLabel:"🌍 언어:",
+        title:"I Pray For You",
+        subtitle:"당신의 마음을 위한 따뜻하고 신비로운 메시지.",
+        focusLabel:"메시지의 초점",
+        focusAny:"전체",
+        focusLove:"사랑",
+        focusHealth:"건강",
+        focusWealth:"풍요",
+        focusPeace:"평온",
+        focusSuccess:"성공",
+        nameLabel:"이름 (선택 사항)",
+        nameHint:"메시지 안에서만 사용되며 어디에도 저장되지 않습니다.",
+        namePlaceholder:"여기에 이름을 입력하세요",
+        wishLabel:"당신의 소원 / 요청",
+        wishHint:"당신의 의도를 적어주세요. 이 텍스트는 저장되지 않습니다.",
+        wishPlaceholder:"여기에 소원을 입력하세요",
+        paymentTitle:"결제 (USDT – TRC20 / BEP20)",
+        chooseAmount:"결제 금액을 선택하세요:",
+        customAmountPlaceholder:"또는 원하는 금액(USDT)을 입력하세요",
+        networkLabel:"네트워크: TRC20 또는 BEP20",
+        sendWalletLabel:"이 지갑 주소로 전송하세요:",
+        payInfo:"선택한 USDT 금액을 위 지갑으로 보낸 뒤, 아래 버튼을 눌러 신비로운 메시지를 받아보세요.",
+        showButton:"결제 완료 – 메시지 보기",
+        messageTitle:"당신의 메시지",
+        defaultMessage:"당신을 위한 선한 마음으로 쓰인 메시지가 여기에 나타납니다.",
+        footer:"이 경험은 어떤 종교와도 연결되어 있지 않으며, 긍정적인 인간의 소망에 관한 것입니다.",
+        copyWallet:"지갑 주소 복사",
+        copied:"복사됨!",
+        showQr:"QR 코드 표시",
+        qrNote:"지갑 앱으로 이 QR 코드를 스캔해 USDT를 보내세요.",
+        shareButton:"이 경험 공유하기",
+        shareText:"이것은 I Pray For You입니다. 10–15 USDT를 이 지갑({wallet})으로 보내면, 나만의 신비롭고 따뜻한 메시지를 받게 됩니다.",
+        paymentNotePrefix:" (",
+        paymentNoteSuffix:" USDT를 보낸 뒤 선택된 메시지입니다.)"
+      },
+      ja: {
+        langLabel:"🌍 言語:",
+        title:"I Pray For You",
+        subtitle:"あなたの心のための、やさしくて神秘的なメッセージ。",
+        focusLabel:"メッセージのテーマ",
+        focusAny:"指定なし",
+        focusLove:"愛",
+        focusHealth:"健康",
+        focusWealth:"豊かさ",
+        focusPeace:"平和",
+        focusSuccess:"成功",
+        nameLabel:"お名前（任意）",
+        nameHint:"メッセージの中だけで使われ、どこにも保存されません。",
+        namePlaceholder:"ここにお名前を入力してください",
+        wishLabel:"あなたの願いごと / 祈り",
+        wishHint:"願いを書いてください。このテキストは保存されません。",
+        wishPlaceholder:"ここに願いごとを入力してください",
+        paymentTitle:"支払い（USDT – TRC20 / BEP20）",
+        chooseAmount:"金額を選択してください:",
+        customAmountPlaceholder:"またはカスタム金額（USDT）を入力",
+        networkLabel:"ネットワーク：TRC20 または BEP20",
+        sendWalletLabel:"このウォレットアドレスに送金してください：",
+        payInfo:"選んだ金額の USDT を上記アドレスに送金したあと、下のボタンを押してメッセージを受け取ってください。",
+        showButton:"支払い完了 – メッセージを表示",
+        messageTitle:"あなたへのメッセージ",
+        defaultMessage:"あなたの幸せを願って書かれたメッセージがここに表示されます。",
+        footer:"この体験はいかなる宗教とも関係なく、前向きで人間的な願いに関するものです。",
+        copyWallet:"ウォレットアドレスをコピー",
+        copied:"コピーしました！",
+        showQr:"QRコードを表示",
+        qrNote:"ウォレットアプリでこのQRコードを読み取り、USDTを送金してください。",
+        shareButton:"この体験を共有する",
+        shareText:"これは I Pray For You です。このウォレット {wallet} に 10〜15 USDT を送ると、あなただけの神秘的であたたかいメッセージを受け取れます。",
+        paymentNotePrefix:"（",
+        paymentNoteSuffix:" USDT を支払ったあとに選ばれたメッセージです。）"
+      }
+    };
+
+    // بانک پیام‌ها با موضوع و ترجمه‌ها
+    const messageBank = [
+      // LOVE
+      {
+        category:"love",
+        en:"May gentle love find you in honest and safe places.",
+        fa:"امیدوارم عشق آرام و امن در صادقانه‌ترین لحظه‌ها سراغت بیاید.",
+        ar:"أسأل أن يجدك حب هادئ في أماكن صادقة وآمنة.",
+        es:"Que un amor suave te encuentre en lugares sinceros y seguros.",
+        de:"Möge dich eine sanfte Liebe an ehrlichen und sicheren Orten finden.",
+        zh:"愿温柔的爱在真诚而安全的地方找到你。",
+        ko:"진실되고 안전한 곳에서 부드러운 사랑이 당신을 찾기를 바랍니다。",
+        ja:"穏やかな愛が、誠実で安全な場所であなたを見つけますように。"
+      },
+      {
+        category:"love",
+        en:"May you feel deeply loved without needing to perform or prove.",
+        fa:"امیدوارم عمیقاً دوست‌داشتنی بودن را بدون هیچ نقش‌بازی و اثباتی تجربه کنی.",
+        ar:"أتمنى أن تشعر بأنك محبوب بعمق دون أن تضطر لتمثيل أو إثبات.",
+        es:"Que te sientas profundamente amado sin tener que demostrar nada.",
+        de:"Mögest du dich tief geliebt fühlen, ohne etwas beweisen zu müssen.",
+        zh:"愿你无需证明自己，也能深深感受到被爱。",
+        ko:"무언가를 증명하지 않아도 깊이 사랑받는다고 느끼길 바랍니다。",
+        ja:"何も証明しなくても、深く愛されていると感じられますように。"
+      },
+      // HEALTH
+      {
+        category:"health",
+        en:"May your body find rest and your mind learn to breathe again.",
+        fa:"امیدوارم بدنت آرام بگیرد و ذهنَت دوباره نفس کشیدن را یاد بگیرد.",
+        ar:"أتمنى أن يجد جسدك راحته وأن يتعلم عقلك أن يتنفس من جديد.",
+        es:"Que tu cuerpo descanse y tu mente aprenda a respirar otra vez.",
+        de:"Möge dein Körper Ruhe finden und dein Geist wieder atmen lernen.",
+        zh:"愿你的身体得到休息，你的心重新学会呼吸。",
+        ko:"당신의 몸이 쉬고, 마음이 다시 숨 쉬는 법을 배우길 바랍니다。",
+        ja:"あなたの体が休まり、心が再び深く息を吸えるようになりますように。"
+      },
+      {
+        category:"health",
+        en:"May every small step you take lead you toward deeper healing.",
+        fa:"امیدوارم هر قدم کوچک تو را به سویِ درمان عمیق‌تر نزدیک‌تر کند.",
+        ar:"أسأل أن يقربك كل خطوة صغيرة من شفاء أعمق.",
+        es:"Que cada pequeño paso te acerque a una sanación más profunda.",
+        de:"Möge dich jeder kleine Schritt zu tieferer Heilung führen.",
+        zh:"愿你迈出的每一步，都把你带向更深的疗愈。",
+        ko:"당신이 내딛는 작은 발걸음 하나하나가 더 깊은 치유로 이어지길 바랍니다。",
+        ja:"あなたの小さな一歩一歩が、より深い癒しへとつながりますように。"
+      },
+      // WEALTH
+      {
+        category:"wealth",
+        en:"May honest opportunities bring you the wealth you are ready to hold.",
+        fa:"امیدوارم فرصت‌های درست، ثروتی را به سراغت بیاورند که آماده‌ی نگه‌داشتنش هستی.",
+        ar:"أتمنى أن تجلب لك الفرص الصادقة رزقاً أنت مستعد لاحتضانه.",
+        es:"Que las oportunidades honestas te traigan la abundancia que estás listo para sostener.",
+        de:"Mögen ehrliche Chancen dir den Wohlstand bringen, den du halten kannst.",
+        zh:"愿真诚的机会带给你你已准备好承载的富足。",
+        ko:"정직한 기회들이 당신이 감당할 준비가 된 풍요를 가져다주길 바랍니다。",
+        ja:"誠実なチャンスが、あなたが受け取る準備のできた豊かさを運んで来ますように。"
+      },
+      {
+        category:"wealth",
+        en:"May money become a quiet tool for your freedom, not a loud worry in your mind.",
+        fa:"امیدوارم پول برای تو ابزاری آرام برای آزادی باشد، نه دغدغه‌ای پر سر و صدا در ذهن.",
+        ar:"أتمنى أن يصبح المال أداة هادئة لحريتك، لا هماً صاخباً في عقلك.",
+        es:"Que el dinero sea una herramienta tranquila para tu libertad, no una preocupación ruidosa en tu mente.",
+        de:"Möge Geld ein stilles Werkzeug deiner Freiheit sein, kein lauter Sorgenpunkt in deinem Kopf.",
+        zh:"愿金钱成为你自由的安静工具，而不是你脑中吵闹的烦恼。",
+        ko:"돈이 당신의 자유를 위한 조용한 도구가 되길, 머릿속을 시끄럽게 하는 걱정이 아니길 바랍니다。",
+        ja:"お金が、あなたの自由のための静かな道具となり、頭の中を騒がせる不安になりませんように。"
+      },
+      // PEACE
+      {
+        category:"peace",
+        en:"May a soft peace sit on your shoulders, even when life feels heavy.",
+        fa:"امیدوارم حتی وقتی زندگی سنگین است، آرامشی نرم روی شانه‌هایت بنشیند.",
+        ar:"أتمنى أن تجلس سكينة ناعمة على كتفيك حتى عندما تبدو الحياة ثقيلة.",
+        es:"Que una paz suave descanse sobre tus hombros, incluso cuando la vida se siente pesada.",
+        de:"Möge ein sanfter Frieden auf deinen Schultern ruhen, selbst wenn das Leben schwer wirkt.",
+        zh:"愿温柔的宁静落在你肩上，即使生活显得沉重。",
+        ko:"삶이 무겁게 느껴질 때에도, 부드러운 평화가 당신의 어깨 위에 머물길 바랍니다。",
+        ja:"人生が重く感じるときでさえ、やわらかな平和があなたの肩にそっと寄り添いますように。"
+      },
+      {
+        category:"peace",
+        en:"May your thoughts grow quiet enough for your heart to be heard.",
+        fa:"امیدوارم افکارت آن‌قدر آرام شوند که صدای دلَت شنیده شود.",
+        ar:"أتمنى أن يهدأ فكرك بما يكفي ليسمع قلبك.",
+        es:"Que tus pensamientos se vuelvan lo bastante silenciosos para que se escuche tu corazón.",
+        de:"Mögen deine Gedanken so still werden, dass dein Herz gehört wird.",
+        zh:"愿你的思绪足够安静，让你的心声被听见。",
+        ko:"당신의 마음 소리가 들릴 수 있을 만큼, 생각들이 고요해지길 바랍니다。",
+        ja:"心の声が聞こえるくらいに、あなたの思考が静まりますように。"
+      },
+      // SUCCESS
+      {
+        category:"success",
+        en:"May success come as a natural result of your patience, honesty and small brave steps.",
+        fa:"امیدوارم موفقیت، نتیجه‌ی طبیعی صبر، صداقت و قدم‌های کوچک و شجاعانه‌ات باشد.",
+        ar:"أتمنى أن يأتي النجاح كنتيجة طبيعية لصبرك وصدقك وخطواتك الصغيرة الشجاعة.",
+        es:"Que el éxito llegue como resultado natural de tu paciencia, tu honestidad y tus pequeños pasos valientes.",
+        de:"Möge Erfolg die natürliche Folge deiner Geduld, Ehrlichkeit und kleinen mutigen Schritte sein.",
+        zh:"愿成功成为你耐心、诚实和小小勇敢步伐的自然结果。",
+        ko:"성공이 당신의 인내, 정직, 그리고 작은 용기의 걸음들에서 자연스럽게 피어나길 바랍니다。",
+        ja:"成功が、あなたの忍耐と正直さ、小さな勇気ある一歩の自然な結果として訪れますように。"
+      },
+      {
+        category:"success",
+        en:"May you define success in a way that keeps your soul alive and your heart kind.",
+        fa:"امیدوارم موفقیت را طوری تعریف کنی که روحت زنده بماند و قلبت مهربان.",
+        ar:"أتمنى أن تعرّف النجاح بطريقة تُبقي روحك حيّة وقلبك لطيفاً.",
+        es:"Que definas el éxito de una forma que mantenga viva tu alma y amable tu corazón.",
+        de:"Mögest du Erfolg so definieren, dass deine Seele lebendig und dein Herz freundlich bleibt.",
+        zh:"愿你用一种让灵魂鲜活、内心温柔的方式来定义成功。",
+        ko:"성공을, 영혼은 살아 있고 마음은 따뜻하게 남을 수 있는 방식으로 정의하길 바랍니다。",
+        ja:"魂を生かし、心のやさしさを守れるようなかたちで、成功を定義できますように。"
+      }
+    ];
+
+    function setLanguage(code) {
+      const t = translations[code] || translations.en;
+      currentLang = code;
+
+      document.documentElement.lang = code;
+      document.body.dir = (code === "fa" || code === "ar") ? "rtl" : "ltr";
+
+      document.getElementById("langLabel").textContent = t.langLabel;
+      document.getElementById("appTitle").textContent = t.title;
+      document.getElementById("subtitle").textContent = t.subtitle;
+      document.getElementById("focusLabel").textContent = t.focusLabel;
+      document.getElementById("focusAnyOpt").textContent = t.focusAny;
+      document.getElementById("focusLoveOpt").textContent = t.focusLove;
+      document.getElementById("focusHealthOpt").textContent = t.focusHealth;
+      document.getElementById("focusWealthOpt").textContent = t.focusWealth;
+      document.getElementById("focusPeaceOpt").textContent = t.focusPeace;
+      document.getElementById("focusSuccessOpt").textContent = t.focusSuccess;
+
+      document.getElementById("nameLabel").textContent = t.nameLabel;
+      document.getElementById("nameHint").textContent = t.nameHint;
+      document.getElementById("wishLabel").textContent = t.wishLabel;
+      document.getElementById("wishHint").textContent = t.wishHint;
+      document.getElementById("paymentTitle").textContent = t.paymentTitle;
+      document.getElementById("chooseAmountLabel").textContent = t.chooseAmount;
+      document.getElementById("networkLabel").textContent = t.networkLabel;
+      document.getElementById("sendWalletLabel").textContent = t.sendWalletLabel;
+      document.getElementById("payInfo").textContent = t.payInfo;
+      document.getElementById("messageTitle").textContent = t.messageTitle;
+      document.getElementById("footerText").textContent = t.footer;
+      copyWalletBtn.textContent = t.copyWallet;
+      showQrBtn.textContent = t.showQr;
+      document.getElementById("qrNote").textContent = t.qrNote;
+      shareBtn.textContent = t.shareButton;
+
+      nameInput.placeholder = t.namePlaceholder;
+      document.getElementById("wishInput").placeholder = t.wishPlaceholder;
+      customAmountInput.placeholder = t.customAmountPlaceholder;
+      showMessageBtn.textContent = t.showButton;
+
+      if (!messageText.dataset.hasMessage) {
+        messageText.textContent = t.defaultMessage;
+      }
+    }
+
+    amountButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        amountButtons.forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedAmount = Number(btn.dataset.amount);
+        customAmountInput.value = "";
+      });
+    });
+
+    customAmountInput.addEventListener("input", () => {
+      const v = Number(customAmountInput.value);
+      if (!isNaN(v) && v > 0) {
+        selectedAmount = v;
+        amountButtons.forEach(b => b.classList.remove("selected"));
+      }
+    });
+
+    showMessageBtn.addEventListener("click", () => {
+      const t = translations[currentLang] || translations.en;
+      const name = nameInput.value.trim();
+      const focus = focusSelect.value;
+
+      let pool = messageBank;
+      if (focus !== "any") {
+        pool = messageBank.filter(m => m.category === focus);
+      }
+      if (pool.length === 0) pool = messageBank;
+
+      const msg = pool[Math.floor(Math.random() * pool.length)];
+      const base = msg[currentLang] || msg.en;
+
+      let personalized;
+      if (name) {
+        if (currentLang === "fa") {
+          personalized = name + " عزیز، " + base;
+        } else if (currentLang === "ar") {
+          personalized = "يا " + name + "، " + base;
+        } else {
+          personalized = name + ", " + base;
+        }
+      } else {
+        personalized = base;
+      }
+
+      const note = t.paymentNotePrefix + selectedAmount + t.paymentNoteSuffix;
+      messageText.textContent = personalized + note;
+      messageText.dataset.hasMessage = "true";
+
+      if (chime && chime.play) {
+        chime.play().catch(()=>{});
+      }
+    });
+
+    copyWalletBtn.addEventListener("click", () => {
+      const addr = walletAddressEl.textContent.trim();
+      const t = translations[currentLang] || translations.en;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(addr).then(
+          () => {
+            const oldText = copyWalletBtn.textContent;
+            copyWalletBtn.textContent = t.copied;
+            setTimeout(() => {
+              copyWalletBtn.textContent = t.copyWallet;
+            }, 1500);
+          },
+          () => { alert(addr); }
+        );
+      } else {
+        alert(addr);
+      }
+    });
+
+    showQrBtn.addEventListener("click", () => {
+      const addr = walletAddressEl.textContent.trim();
+      const data = encodeURIComponent(addr);
+      qrImage.src =
+        "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" +
+        data;
+      qrContainer.style.display = "flex";
+    });
+
+    shareBtn.addEventListener("click", () => {
+      const addr = walletAddressEl.textContent.trim();
+      const t = translations[currentLang] || translations.en;
+      const text = t.shareText.replace("{wallet}", addr);
+
+      if (navigator.share) {
+        navigator.share({
+          title: t.title,
+          text: text
+        }).catch(()=>{});
+      } else {
+        alert(text);
+      }
+    });
+
+    langSelect.addEventListener("change", () => {
+      setLanguage(langSelect.value);
+    });
+
+    // زبان پیش‌فرض
+    setLanguage("fa");  // می‌توانی اگر خواستی "en" بگذاری
+  </script>
+</body>
+</html>
